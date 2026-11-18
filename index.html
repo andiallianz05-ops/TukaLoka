@@ -1,0 +1,728 @@
+<!DOCTYPE html>
+<html lang="id" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TukarLokal — Komunitas Tukar Buku & Barang Hobi</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts: Inter & Plus Jakarta Sans -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@600;700;800&display=swap" rel="stylesheet">
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        display: ['Plus Jakarta Sans', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="bg-emerald-50/30 text-slate-800 font-sans antialiased selection:bg-emerald-200 selection:text-emerald-950">
+
+    <!-- Toast Notification Container (Pengganti alert) -->
+    <div id="toast-container" class="fixed bottom-5 right-5 z-50 flex flex-col gap-2 pointer-events-none"></div>
+
+    <!-- Navbar -->
+    <header class="sticky top-0 z-40 bg-white/90 backdrop-blur-md border-b border-slate-200/80">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+            <!-- Brand Logo -->
+            <a href="#" class="flex items-center gap-2.5 group">
+                <div class="w-9 h-9 rounded-xl bg-emerald-600 text-white flex items-center justify-center shadow-sm group-hover:bg-emerald-700 transition-colors">
+                    <i data-lucide="repeat" class="w-5 h-5"></i>
+                </div>
+                <span class="font-display text-xl font-extrabold tracking-tight text-slate-900">Tukar<span class="text-emerald-600">Lokal</span></span>
+            </a>
+
+            <!-- Desktop Navigation -->
+            <nav class="hidden md:flex items-center gap-8 text-sm font-medium text-slate-600">
+                <a href="#katalog" class="hover:text-emerald-700 transition-colors">Jelajahi Barang</a>
+                <a href="#cara-kerja" class="hover:text-emerald-700 transition-colors">Cara Barter</a>
+            </nav>
+
+            <!-- Action Buttons -->
+            <div class="flex items-center gap-2.5">
+                <button onclick="openInboxModal()" class="relative p-2.5 rounded-full text-slate-600 hover:bg-slate-100 transition-colors" title="Tawaran Masuk">
+                    <i data-lucide="inbox" class="w-5 h-5"></i>
+                    <span id="offer-badge" class="hidden absolute top-1.5 right-1.5 w-2.5 h-2.5 bg-amber-500 rounded-full ring-2 ring-white"></span>
+                </button>
+                <button onclick="openPostModal()" class="inline-flex items-center gap-2 bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-semibold px-4 py-2.5 rounded-full shadow-sm transition-all active:scale-95">
+                    <i data-lucide="plus-circle" class="w-4 h-4"></i>
+                    <span>Tawarkan Barang</span>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Hero Section -->
+    <section class="relative overflow-hidden pt-12 pb-16 sm:pt-20 sm:pb-24 bg-gradient-to-b from-emerald-100/60 via-teal-50/40 to-transparent border-b border-slate-200/60">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+            <span class="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-semibold bg-emerald-100 text-emerald-800 mb-6">
+                <i data-lucide="leaf" class="w-3.5 h-3.5"></i>
+                Ekonomi Sirkular & Komunitas Ramah Lingkungan
+            </span>
+            <h1 class="font-display text-4xl sm:text-5xl lg:text-6xl font-extrabold text-slate-900 tracking-tight max-w-3xl mx-auto leading-tight">
+                Beri Nyawa Baru pada <span class="text-emerald-600">Buku & Barang Hobimu.</span>
+            </h1>
+            <p class="mt-5 text-base sm:text-lg text-slate-600 max-w-2xl mx-auto leading-relaxed">
+                Tukar novel yang sudah selesai dibaca, komik koleksi, atau perlengkapan hobi dengan warga di sekitarmu. Tanpa uang, tanpa limbah, penuh cerita baru.
+            </p>
+            <div class="mt-8 flex flex-wrap items-center justify-center gap-4">
+                <a href="#katalog" class="px-6 py-3.5 rounded-full bg-slate-900 text-white font-semibold text-sm hover:bg-slate-800 transition-all shadow-sm">
+                    Cari Barang Tukaran
+                </a>
+                <button onclick="openPostModal()" class="px-6 py-3.5 rounded-full bg-white text-slate-900 border border-slate-300 font-semibold text-sm hover:bg-slate-50 transition-all">
+                    Pasang Barangmu
+                </button>
+            </div>
+
+            <!-- Community Impact Stats -->
+            <div class="mt-14 grid grid-cols-3 gap-4 max-w-xl mx-auto pt-8 border-t border-slate-200/80">
+                <div>
+                    <div id="stat-items" class="font-display text-2xl font-extrabold text-slate-900">6</div>
+                    <div class="text-xs text-slate-500 mt-0.5">Barang Tersedia</div>
+                </div>
+                <div>
+                    <div id="stat-swaps" class="font-display text-2xl font-extrabold text-emerald-600">142</div>
+                    <div class="text-xs text-slate-500 mt-0.5">Berhasil Ditukar</div>
+                </div>
+                <div>
+                    <div id="stat-cities" class="font-display text-2xl font-extrabold text-slate-900">5</div>
+                    <div class="text-xs text-slate-500 mt-0.5">Area Komunitas</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Main Catalog Section -->
+    <main id="katalog" class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 sm:py-16">
+        
+        <!-- Filter & Search Controls -->
+        <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-4 mb-10">
+            <!-- Category Filter Pills -->
+            <div class="flex items-center gap-2 overflow-x-auto pb-2 lg:pb-0">
+                <button data-category="all" class="filter-btn px-4 py-2 rounded-full text-sm font-semibold bg-emerald-600 text-white transition-all whitespace-nowrap">
+                    Semua Kategori
+                </button>
+                <button data-category="Buku & Novel" class="filter-btn px-4 py-2 rounded-full text-sm font-medium bg-white text-slate-600 border border-slate-200 hover:bg-slate-50 transition-all whitespace-nowrap">
+                    📚 Buku & Novel
+                </button>
+                <button data-category="Komik & Manga" class="filter-btn px-4 py-2 rounded-full text-sm font-medium bg-white text-slate-600 border border-slate-200 hover:bg-slate-50 transition-all whitespace-nowrap">
+                    💬 Komik & Manga
+                </button>
+                <button data-category="Alat Hobi & Game" class="filter-btn px-4 py-2 rounded-full text-sm font-medium bg-white text-slate-600 border border-slate-200 hover:bg-slate-50 transition-all whitespace-nowrap">
+                    🎲 Alat Hobi & Game
+                </button>
+                <button data-category="Musik & Seni" class="filter-btn px-4 py-2 rounded-full text-sm font-medium bg-white text-slate-600 border border-slate-200 hover:bg-slate-50 transition-all whitespace-nowrap">
+                    🎸 Musik & Seni
+                </button>
+            </div>
+
+            <!-- Search & Location Filter -->
+            <div class="flex flex-col sm:flex-row gap-3">
+                <div class="relative w-full sm:w-64">
+                    <i data-lucide="search" class="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2"></i>
+                    <input type="text" id="search-input" placeholder="Cari judul buku, barang..." 
+                        class="w-full pl-10 pr-4 py-2 bg-white border border-slate-200 rounded-full text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500/30 focus:border-emerald-500 transition-all">
+                </div>
+                <select id="city-filter" class="px-4 py-2 bg-white border border-slate-200 rounded-full text-sm text-slate-700 focus:outline-none focus:border-emerald-500">
+                    <option value="all">📍 Semua Kota</option>
+                    <option value="Bogor">Bogor</option>
+                    <option value="Bandung">Bandung</option>
+                    <option value="Jakarta">Jakarta</option>
+                    <option value="Yogyakarta">Yogyakarta</option>
+                    <option value="Surabaya">Surabaya</option>
+                </select>
+            </div>
+        </div>
+
+        <!-- Items Grid -->
+        <div id="items-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8">
+            <!-- Cards injected via JS -->
+        </div>
+
+        <!-- Empty State -->
+        <div id="empty-state" class="hidden text-center py-20 bg-white rounded-3xl border border-slate-200/70">
+            <div class="w-16 h-16 bg-emerald-50 rounded-full flex items-center justify-center mx-auto mb-4 text-emerald-600">
+                <i data-lucide="package-search" class="w-8 h-8"></i>
+            </div>
+            <h3 class="font-display text-lg font-bold text-slate-900">Belum ada barang yang cocok</h3>
+            <p class="text-sm text-slate-500 mt-1 max-w-md mx-auto">Coba ubah filter kota atau kata kunci pencarianmu, atau jadilah yang pertama menawarkan barang di kategori ini.</p>
+        </div>
+    </main>
+
+    <!-- How It Works Section -->
+    <section id="cara-kerja" class="bg-slate-900 text-slate-300 py-16">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center max-w-2xl mx-auto mb-12">
+                <h2 class="font-display text-3xl font-extrabold text-white">Cara Kerja Barter di TukarLokal</h2>
+                <p class="mt-3 text-slate-400 text-sm sm:text-base">Tiga langkah mudah untuk bertukar barang dengan aman di komunitas lokalmu.</p>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div class="p-6 rounded-3xl bg-slate-800/70 border border-slate-700/60">
+                    <div class="w-10 h-10 rounded-2xl bg-emerald-500/20 text-emerald-400 font-display font-bold flex items-center justify-center mb-4">1</div>
+                    <h3 class="text-white font-bold text-base">Unggah Barang & Wishlist</h3>
+                    <p class="text-xs text-slate-400 mt-2 leading-relaxed">Foto buku atau barang hobimu yang masih layak pakai, lalu tuliskan barang apa yang sedang kamu cari sebagai penukarnya.</p>
+                </div>
+                <div class="p-6 rounded-3xl bg-slate-800/70 border border-slate-700/60">
+                    <div class="w-10 h-10 rounded-2xl bg-emerald-500/20 text-emerald-400 font-display font-bold flex items-center justify-center mb-4">2</div>
+                    <h3 class="text-white font-bold text-base">Ajukan Tawaran Tukar</h3>
+                    <p class="text-xs text-slate-400 mt-2 leading-relaxed">Temukan barang yang kamu inginkan, klik "Ajukan Tukar", dan tawarkan koleksimu kepada pemilik barang.</p>
+                </div>
+                <div class="p-6 rounded-3xl bg-slate-800/70 border border-slate-700/60">
+                    <div class="w-10 h-10 rounded-2xl bg-emerald-500/20 text-emerald-400 font-display font-bold flex items-center justify-center mb-4">3</div>
+                    <h3 class="text-white font-bold text-base">COD di Tempat Umum</h3>
+                    <p class="text-xs text-slate-400 mt-2 leading-relaxed">Setelah sepakat, lakukan pertemuan (COD) di taman baca, kafe, atau stasiun terdekat untuk memeriksa kondisi dan bertukar langsung.</p>
+                </div>
+            </div>
+
+            <div class="mt-12 pt-8 border-t border-slate-800 flex flex-col sm:flex-row items-center justify-between text-xs text-slate-500 gap-4">
+                <p>&copy; 2026 TukarLokal Indonesia. Gerakan Berbagi & Kurangi Limbah Konsumsi.</p>
+                <p>Utamakan COD di ruang publik yang ramai demi keamanan bersama.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- MODAL 1: Detail Barang & Ajukan Tawaran Barter -->
+    <div id="swap-modal" class="fixed inset-0 z-50 hidden items-center justify-center p-4 bg-slate-950/70 backdrop-blur-sm">
+        <div class="bg-white rounded-3xl max-w-4xl w-full max-h-[90vh] overflow-hidden shadow-2xl flex flex-col md:flex-row">
+            <!-- Left: Item Photo -->
+            <div class="md:w-1/2 bg-slate-100 relative flex items-center justify-center max-h-[40vh] md:max-h-[90vh]">
+                <img id="modal-img" src="" alt="Preview Barang" class="w-full h-full object-cover">
+                <span id="modal-condition" class="absolute bottom-4 left-4 px-3 py-1 rounded-full text-xs font-semibold bg-white/95 text-slate-800 shadow-sm">
+                    Kondisi: 90% Mulus
+                </span>
+            </div>
+
+            <!-- Right: Details & Propose Swap Form -->
+            <div class="md:w-1/2 p-6 sm:p-8 flex flex-col justify-between overflow-y-auto max-h-[50vh] md:max-h-[90vh]">
+                <div>
+                    <div class="flex items-start justify-between gap-2">
+                        <span id="modal-category" class="px-3 py-1 rounded-full text-xs font-semibold bg-emerald-100 text-emerald-800">Kategori</span>
+                        <button onclick="closeSwapModal()" class="p-2 rounded-full hover:bg-slate-100 text-slate-500 transition-colors">
+                            <i data-lucide="x" class="w-5 h-5"></i>
+                        </button>
+                    </div>
+
+                    <h2 id="modal-title" class="font-display text-2xl font-bold text-slate-900 mt-3">Judul Barang</h2>
+                    <div class="flex items-center gap-2 mt-2 text-xs text-slate-600">
+                        <span class="font-semibold text-slate-900 flex items-center gap-1"><i data-lucide="user" class="w-3.5 h-3.5 text-emerald-600"></i> <span id="modal-owner">Pemilik</span></span>
+                        <span>•</span>
+                        <span class="flex items-center gap-1"><i data-lucide="map-pin" class="w-3.5 h-3.5 text-emerald-600"></i> <span id="modal-city">Kota</span></span>
+                    </div>
+
+                    <p id="modal-desc" class="mt-4 text-sm text-slate-600 leading-relaxed">
+                        Deskripsi detail barang...
+                    </p>
+
+                    <!-- Wishlist Box -->
+                    <div class="mt-5 p-4 rounded-2xl bg-amber-50 border border-amber-200/70">
+                        <div class="text-xs font-bold text-amber-900 flex items-center gap-1.5">
+                            <i data-lucide="sparkles" class="w-4 h-4 text-amber-600"></i>
+                            Dicari sebagai penukar (Wishlist):
+                        </div>
+                        <p id="modal-wishlist" class="text-xs text-amber-800 mt-1 font-medium">
+                            Novel fiksi atau komik detektif
+                        </p>
+                    </div>
+
+                    <!-- Propose Swap Form -->
+                    <form onsubmit="submitSwapOffer(event)" class="mt-6 pt-5 border-t border-slate-100 space-y-3">
+                        <h3 class="text-xs font-bold uppercase tracking-wider text-slate-400">Ajukan Barang Tukaranmu</h3>
+                        <div>
+                            <input type="text" id="offer-item-name" required placeholder="Barang yang kamu tawarkan (misal: Novel Bumi - Tere Liye)" 
+                                class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:border-emerald-500">
+                        </div>
+                        <div class="grid grid-cols-2 gap-2">
+                            <input type="text" id="offer-sender-name" required placeholder="Namamu" 
+                                class="w-full px-3.5 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs focus:outline-none focus:border-emerald-500">
+                            <input type="text" id="offer-contact" required placeholder="No. WA / IG untuk COD" 
+                                class="w-full px-3.5 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs focus:outline-none focus:border-emerald-500">
+                        </div>
+                        <button type="submit" class="w-full py-3 rounded-full bg-emerald-600 hover:bg-emerald-700 text-white font-semibold text-sm shadow-sm transition-all flex items-center justify-center gap-2">
+                            <i data-lucide="repeat" class="w-4 h-4"></i>
+                            Kirim Tawaran Barter
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL 2: Pasang Barang Baru -->
+    <div id="post-modal" class="fixed inset-0 z-50 hidden items-center justify-center p-4 bg-slate-950/70 backdrop-blur-sm">
+        <div class="bg-white rounded-3xl max-w-lg w-full p-6 sm:p-8 shadow-2xl max-h-[90vh] overflow-y-auto">
+            <div class="flex items-center justify-between mb-6">
+                <div>
+                    <h2 class="font-display text-2xl font-bold text-slate-900">Tawarkan Barangmu</h2>
+                    <p class="text-xs text-slate-500 mt-0.5">Pasang barang layak pakai dan temukan teman tukar di kotamu.</p>
+                </div>
+                <button onclick="closePostModal()" class="p-2 rounded-full hover:bg-slate-100 text-slate-500">
+                    <i data-lucide="x" class="w-5 h-5"></i>
+                </button>
+            </div>
+
+            <form onsubmit="handleNewItemSubmit(event)" class="space-y-4">
+                <div>
+                    <label class="block text-xs font-semibold text-slate-700 mb-1">Nama Buku / Barang *</label>
+                    <input type="text" id="new-title" required placeholder="Contoh: Paket Komik Detektif Conan Vol 1-5" 
+                        class="w-full px-4 py-2.5 rounded-xl border border-slate-200 text-sm focus:outline-none focus:border-emerald-500">
+                </div>
+
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-700 mb-1">Kategori *</label>
+                        <select id="new-category" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-sm bg-white focus:outline-none focus:border-emerald-500">
+                            <option value="Buku & Novel">📚 Buku & Novel</option>
+                            <option value="Komik & Manga">💬 Komik & Manga</option>
+                            <option value="Alat Hobi & Game">🎲 Alat Hobi & Game</option>
+                            <option value="Musik & Seni">🎸 Musik & Seni</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-700 mb-1">Kondisi Barang *</label>
+                        <select id="new-condition" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-sm bg-white focus:outline-none focus:border-emerald-500">
+                            <option value="Seperti Baru (95%)">Seperti Baru (95%)</option>
+                            <option value="Sangat Baik (85%)">Sangat Baik (85%)</option>
+                            <option value="Layak Pakai (75%)">Layak Pakai (75%)</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-700 mb-1">Nama Pemilik *</label>
+                        <input type="text" id="new-owner" required placeholder="Nama panggilan" 
+                            class="w-full px-4 py-2.5 rounded-xl border border-slate-200 text-sm focus:outline-none focus:border-emerald-500">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-700 mb-1">Kota / Area COD *</label>
+                        <select id="new-city" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-sm bg-white focus:outline-none focus:border-emerald-500">
+                            <option value="Bogor">Bogor</option>
+                            <option value="Bandung">Bandung</option>
+                            <option value="Jakarta">Jakarta</option>
+                            <option value="Yogyakarta">Yogyakarta</option>
+                            <option value="Surabaya">Surabaya</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-xs font-semibold text-slate-700 mb-1">Foto Barang (Unggah atau URL)</label>
+                    <input type="file" id="new-file" accept="image/*" class="w-full text-xs text-slate-500 file:mr-3 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-xs file:font-semibold file:bg-emerald-50 file:text-emerald-700 hover:file:bg-emerald-100 mb-2">
+                    <input type="url" id="new-img-url" placeholder="Atau tempel tautan foto (https://...)" 
+                        class="w-full px-4 py-2 rounded-xl border border-slate-200 text-xs focus:outline-none focus:border-emerald-500">
+                </div>
+
+                <div>
+                    <label class="block text-xs font-semibold text-slate-700 mb-1">Barang yang Diinginkan (Wishlist) *</label>
+                    <input type="text" id="new-wishlist" required placeholder="Contoh: Novel fantasi, board game, atau bebas tawarkan" 
+                        class="w-full px-4 py-2.5 rounded-xl border border-slate-200 text-sm focus:outline-none focus:border-emerald-500">
+                </div>
+
+                <div>
+                    <label class="block text-xs font-semibold text-slate-700 mb-1">Deskripsi Kondisi & Kelengkapan *</label>
+                    <textarea id="new-desc" required rows="2" placeholder="Jelaskan detail kondisi barang (misal: halaman lengkap, bebas coretan)..." 
+                        class="w-full px-4 py-2.5 rounded-xl border border-slate-200 text-sm focus:outline-none focus:border-emerald-500"></textarea>
+                </div>
+
+                <div class="pt-2 flex justify-end gap-3">
+                    <button type="button" onclick="closePostModal()" class="px-5 py-2.5 rounded-full text-sm font-medium text-slate-600 hover:bg-slate-100">Batal</button>
+                    <button type="submit" class="px-6 py-2.5 rounded-full text-sm font-semibold bg-emerald-600 text-white hover:bg-emerald-700 transition-colors shadow-sm">Tayangkan</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- MODAL 3: Kotak Tawaran Barter -->
+    <div id="inbox-modal" class="fixed inset-0 z-50 hidden items-center justify-center p-4 bg-slate-950/70 backdrop-blur-sm">
+        <div class="bg-white rounded-3xl max-w-lg w-full p-6 sm:p-8 shadow-2xl max-h-[85vh] overflow-y-auto">
+            <div class="flex items-center justify-between mb-5">
+                <div>
+                    <h2 class="font-display text-xl font-bold text-slate-900">Riwayat Tawaran Barter</h2>
+                    <p class="text-xs text-slate-500 mt-0.5">Daftar pengajuan tukar barang yang telah dikirim.</p>
+                </div>
+                <button onclick="closeInboxModal()" class="p-2 rounded-full hover:bg-slate-100 text-slate-500">
+                    <i data-lucide="x" class="w-5 h-5"></i>
+                </button>
+            </div>
+            <div id="offers-list" class="space-y-3">
+                <!-- Offers injected via JS -->
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Data Awal Barang & Buku Komunitas Lokal
+        let items = [
+            {
+                id: 1,
+                title: "Novel Laut Bercerita - Leila S. Chudori",
+                category: "Buku & Novel",
+                condition: "Seperti Baru (95%)",
+                owner: "Rizky Pratama",
+                city: "Bogor",
+                image: "https://images.unsplash.com/photo-1544947950-fa07a98d237f?auto=format&fit=crop&w=800&q=80",
+                wishlist: "Novel karya Dee Lestari atau Eka Kurniawan",
+                description: "Cetakan original, sampul sudah disampul plastik rapi, tidak ada lipatan halaman sama sekali. Siap COD area Stasiun Bogor / Taman Kencana.",
+                swapped: false
+            },
+            {
+                id: 2,
+                title: "Board Game Catan (Edisi Bahasa Indonesia)",
+                category: "Alat Hobi & Game",
+                condition: "Sangat Baik (85%)",
+                owner: "Nadia Putri",
+                city: "Bandung",
+                image: "https://images.unsplash.com/photo-1610890716171-6b1bb98ffd09?auto=format&fit=crop&w=800&q=80",
+                wishlist: "Board game lain (Splendor / Ticket to Ride) atau puzzle 1000 pcs",
+                description: "Semua kartu, dadu, dan bidak kayu lengkap 100%. Kotak luar sedikit lecet penyimpanan tapi komponen dalam masih sangat mulus.",
+                swapped: false
+            },
+            {
+                id: 3,
+                title: "Komik One Piece Vol. 98 - 102 (Set 5 Buku)",
+                category: "Komik & Manga",
+                condition: "Seperti Baru (95%)",
+                owner: "Fajar Nugroho",
+                city: "Jakarta",
+                image: "https://images.unsplash.com/photo-1618519764620-07d3b91e0941?auto=format&fit=crop&w=800&q=80",
+                wishlist: "Komik Jujutsu Kaisen atau Spy x Family volume bebas",
+                description: "Terbitan Elex Media Komputindo asli, kertas masih putih bersih dan bebas menguning. Diutamakan tukar satu set.",
+                swapped: false
+            },
+            {
+                id: 4,
+                title: "Ukulele Soprano Kayu Mahoni + Softcase",
+                category: "Musik & Seni",
+                condition: "Sangat Baik (85%)",
+                owner: "Sinta Maharani",
+                city: "Yogyakarta",
+                image: "https://images.unsplash.com/photo-1516924962500-2b4b3b99ea02?auto=format&fit=crop&w=800&q=80",
+                wishlist: "Set cat air profesional + sketchbook atau kalimba",
+                description: "Senar baru diganti merk Aquila, suara nyaring dan nyaman dimainkan pemula. Jarang dipakai karena sudah pindah ke gitar akustik.",
+                swapped: false
+            },
+            {
+                id: 5,
+                title: "Buku Atomic Habits - James Clear (Terjemahan)",
+                category: "Buku & Novel",
+                condition: "Sangat Baik (85%)",
+                owner: "Dimas Aditya",
+                city: "Surabaya",
+                image: "https://images.unsplash.com/photo-1589829085413-56de8ae18c73?auto=format&fit=crop&w=800&q=80",
+                wishlist: "Buku pengembangan diri atau biografi tokoh teknologi",
+                description: "Original Gramedia, ada sedikit stabilo rapi di beberapa kutipan penting. Cocok untuk yang ingin membangun kebiasaan baru.",
+                swapped: false
+            },
+            {
+                id: 6,
+                title: "Set Kuas Lukis & Palet Kayu",
+                category: "Musik & Seni",
+                condition: "Seperti Baru (95%)",
+                owner: "Alya Kusuma",
+                city: "Bogor",
+                image: "https://images.unsplash.com/photo-1513364776144-60967b0f800f?auto=format&fit=crop&w=800&q=80",
+                wishlist: "Novel misteri / thriller atau tanaman hias indoor kecil",
+                description: "12 ukuran kuas berbeda lengkap dengan pouch kanvas. Baru dipakai 2 kali, bulu kuas sudah dicuci bersih.",
+                swapped: false
+            }
+        ];
+
+        let swapOffers = [];
+        let selectedCategory = 'all';
+        let selectedCity = 'all';
+        let searchQuery = '';
+        let activeItemId = null;
+        let totalCompletedSwaps = 142;
+
+        // Inisialisasi Halaman
+        document.addEventListener('DOMContentLoaded', () => {
+            lucide.createIcons();
+            renderItems();
+            updateStats();
+        });
+
+        // Render Katalog Barang
+        function renderItems() {
+            const grid = document.getElementById('items-grid');
+            const emptyState = document.getElementById('empty-state');
+
+            const filtered = items.filter(item => {
+                const matchCat = selectedCategory === 'all' || item.category === selectedCategory;
+                const matchCity = selectedCity === 'all' || item.city === selectedCity;
+                const matchSearch = item.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                                    item.wishlist.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                                    item.owner.toLowerCase().includes(searchQuery.toLowerCase());
+                return matchCat && matchCity && matchSearch;
+            });
+
+            if (filtered.length === 0) {
+                grid.innerHTML = '';
+                emptyState.classList.remove('hidden');
+                return;
+            }
+
+            emptyState.classList.add('hidden');
+            grid.innerHTML = filtered.map(item => `
+                <article class="group bg-white rounded-3xl border border-slate-200/80 overflow-hidden shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300 flex flex-col justify-between">
+                    <div>
+                        <!-- Image -->
+                        <div class="relative aspect-[4/3] overflow-hidden bg-slate-100">
+                            <img src="${item.image}" alt="${item.title}" 
+                                onerror="this.src='https://placehold.co/800x600/e2e8f0/475569?text=Barang+Tukar'"
+                                class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500">
+                            <span class="absolute top-3.5 left-3.5 px-3 py-1 rounded-full text-xs font-semibold bg-white/95 backdrop-blur-sm text-slate-800 shadow-sm">
+                                ${item.category}
+                            </span>
+                            <span class="absolute bottom-3 right-3 px-2.5 py-1 rounded-full text-[11px] font-medium bg-slate-900/80 text-white backdrop-blur-sm">
+                                📍 ${item.city}
+                            </span>
+                        </div>
+
+                        <!-- Content -->
+                        <div class="p-5">
+                            <div class="flex items-center justify-between text-xs text-slate-500 mb-1.5">
+                                <span>Oleh <strong class="text-slate-700">${item.owner}</strong></span>
+                                <span class="text-emerald-700 font-medium">${item.condition}</span>
+                            </div>
+                            <h3 class="font-display text-lg font-bold text-slate-900 group-hover:text-emerald-700 transition-colors line-clamp-1">
+                                ${item.title}
+                            </h3>
+                            <p class="text-xs text-slate-600 mt-2 line-clamp-2 leading-relaxed">
+                                ${item.description}
+                            </p>
+
+                            <!-- Wishlist Tag -->
+                            <div class="mt-4 p-3 rounded-2xl bg-amber-50/80 border border-amber-200/60">
+                                <span class="text-[11px] font-bold text-amber-900 uppercase tracking-wide block">Dicari Penukar:</span>
+                                <span class="text-xs text-amber-800 font-medium line-clamp-1 mt-0.5">${item.wishlist}</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Footer Action -->
+                    <div class="px-5 pb-5 pt-1">
+                        <button onclick="openSwapModal(${item.id})" class="w-full py-2.5 px-4 rounded-full bg-slate-900 hover:bg-emerald-600 text-white text-xs font-semibold transition-colors flex items-center justify-center gap-2">
+                            <i data-lucide="repeat" class="w-3.5 h-3.5"></i>
+                            Ajukan Tukar Barang
+                        </button>
+                    </div>
+                </article>
+            `).join('');
+
+            lucide.createIcons();
+        }
+
+        // Event Filter Kategori
+        document.querySelectorAll('.filter-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                document.querySelectorAll('.filter-btn').forEach(b => {
+                    b.classList.remove('bg-emerald-600', 'text-white', 'font-semibold');
+                    b.classList.add('bg-white', 'text-slate-600', 'border', 'border-slate-200', 'font-medium');
+                });
+                btn.classList.remove('bg-white', 'text-slate-600', 'border', 'border-slate-200', 'font-medium');
+                btn.classList.add('bg-emerald-600', 'text-white', 'font-semibold');
+                
+                selectedCategory = btn.dataset.category;
+                renderItems();
+            });
+        });
+
+        // Event Filter Kota & Pencarian
+        document.getElementById('city-filter').addEventListener('change', (e) => {
+            selectedCity = e.target.value;
+            renderItems();
+        });
+
+        document.getElementById('search-input').addEventListener('input', (e) => {
+            searchQuery = e.target.value;
+            renderItems();
+        });
+
+        // Modal Detail & Tawaran Barter
+        function openSwapModal(id) {
+            const item = items.find(i => i.id === id);
+            if (!item) return;
+            activeItemId = id;
+
+            document.getElementById('modal-img').src = item.image;
+            document.getElementById('modal-condition').textContent = `Kondisi: ${item.condition}`;
+            document.getElementById('modal-category').textContent = item.category;
+            document.getElementById('modal-title').textContent = item.title;
+            document.getElementById('modal-owner').textContent = item.owner;
+            document.getElementById('modal-city').textContent = item.city;
+            document.getElementById('modal-desc').textContent = item.description;
+            document.getElementById('modal-wishlist').textContent = item.wishlist;
+
+            const modal = document.getElementById('swap-modal');
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+            lucide.createIcons();
+        }
+
+        function closeSwapModal() {
+            const modal = document.getElementById('swap-modal');
+            modal.classList.add('hidden');
+            modal.classList.remove('flex');
+            activeItemId = null;
+        }
+
+        function submitSwapOffer(e) {
+            e.preventDefault();
+            const item = items.find(i => i.id === activeItemId);
+            if (!item) return;
+
+            const offeredItem = document.getElementById('offer-item-name').value.trim();
+            const senderName = document.getElementById('offer-sender-name').value.trim();
+            const contact = document.getElementById('offer-contact').value.trim();
+
+            swapOffers.unshift({
+                id: Date.now(),
+                targetTitle: item.title,
+                targetOwner: item.owner,
+                city: item.city,
+                offeredItem,
+                senderName,
+                contact,
+                status: 'Menunggu Konfirmasi'
+            });
+
+            document.getElementById('offer-item-name').value = '';
+            document.getElementById('offer-sender-name').value = '';
+            document.getElementById('offer-contact').value = '';
+            document.getElementById('offer-badge').classList.remove('hidden');
+
+            closeSwapModal();
+            showToast(`Tawaran barter terkirim ke ${item.owner}!`);
+        }
+
+        // Modal Pasang Barang Baru
+        function openPostModal() {
+            const modal = document.getElementById('post-modal');
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+        }
+
+        function closePostModal() {
+            const modal = document.getElementById('post-modal');
+            modal.classList.add('hidden');
+            modal.classList.remove('flex');
+        }
+
+        function handleNewItemSubmit(e) {
+            e.preventDefault();
+            const title = document.getElementById('new-title').value.trim();
+            const category = document.getElementById('new-category').value;
+            const condition = document.getElementById('new-condition').value;
+            const owner = document.getElementById('new-owner').value.trim();
+            const city = document.getElementById('new-city').value;
+            const wishlist = document.getElementById('new-wishlist').value.trim();
+            const description = document.getElementById('new-desc').value.trim();
+
+            const fileInput = document.getElementById('new-file');
+            const urlInput = document.getElementById('new-img-url').value.trim();
+
+            const saveItem = (imageSrc) => {
+                items.unshift({
+                    id: Date.now(),
+                    title,
+                    category,
+                    condition,
+                    owner,
+                    city,
+                    image: imageSrc,
+                    wishlist,
+                    description,
+                    swapped: false
+                });
+                renderItems();
+                updateStats();
+                closePostModal();
+                e.target.reset();
+                showToast(`"${title}" berhasil ditayangkan di katalog!`);
+            };
+
+            if (fileInput.files && fileInput.files[0]) {
+                const reader = new FileReader();
+                reader.onload = (ev) => saveItem(ev.target.result);
+                reader.readAsDataURL(fileInput.files[0]);
+            } else if (urlInput) {
+                saveItem(urlInput);
+            } else {
+                saveItem(`https://placehold.co/800x600/d1fae5/065f46?text=${encodeURIComponent(title)}`);
+            }
+        }
+
+        // Modal Riwayat Tawaran
+        function openInboxModal() {
+            const list = document.getElementById('offers-list');
+            document.getElementById('offer-badge').classList.add('hidden');
+
+            if (swapOffers.length === 0) {
+                list.innerHTML = `
+                    <div class="text-center py-8 text-slate-400 text-xs">
+                        Belum ada riwayat tawaran barter. Pilih barang di katalog untuk mulai bertukar!
+                    </div>
+                `;
+            } else {
+                list.innerHTML = swapOffers.map(o => `
+                    <div class="p-4 rounded-2xl bg-slate-50 border border-slate-200/80 text-xs space-y-1.5">
+                        <div class="flex items-center justify-between">
+                            <span class="font-bold text-slate-900">Target: ${o.targetTitle}</span>
+                            <span class="px-2.5 py-0.5 rounded-full bg-amber-100 text-amber-800 font-semibold text-[11px]">${o.status}</span>
+                        </div>
+                        <p class="text-slate-600">Barangmu: <strong class="text-emerald-700">${o.offeredItem}</strong></p>
+                        <p class="text-slate-500">Pemilik: ${o.targetOwner} (${o.city}) • Kontakmu: ${o.contact}</p>
+                    </div>
+                `).join('');
+            }
+
+            const modal = document.getElementById('inbox-modal');
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+        }
+
+        function closeInboxModal() {
+            const modal = document.getElementById('inbox-modal');
+            modal.classList.add('hidden');
+            modal.classList.remove('flex');
+        }
+
+        // Update Statistik Komunitas
+        function updateStats() {
+            document.getElementById('stat-items').textContent = items.length;
+            document.getElementById('stat-swaps').textContent = totalCompletedSwaps;
+            const citiesCount = new Set(items.map(i => i.city)).size;
+            document.getElementById('stat-cities').textContent = citiesCount;
+        }
+
+        // Custom Toast Notification
+        function showToast(message) {
+            const container = document.getElementById('toast-container');
+            const toast = document.createElement('div');
+            toast.className = 'bg-slate-900 text-white text-xs font-medium px-4 py-3 rounded-full shadow-lg flex items-center gap-2 transition-all duration-300 translate-y-2 opacity-0';
+            toast.innerHTML = `<i data-lucide="check-circle-2" class="w-4 h-4 text-emerald-400"></i> <span>${message}</span>`;
+            container.appendChild(toast);
+            lucide.createIcons();
+
+            requestAnimationFrame(() => {
+                toast.classList.remove('translate-y-2', 'opacity-0');
+            });
+
+            setTimeout(() => {
+                toast.classList.add('opacity-0', 'translate-y-2');
+                setTimeout(() => toast.remove(), 300);
+            }, 3000);
+        }
+    </script>
+</body>
+</html>
